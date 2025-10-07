@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Message, QARequest, QAResponse, ChatRequest, ChatResponse, ChunkResponse } from '../types/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/chat/process';
+const API_URL = '/api/chat/process';
 
 export interface ChatApiOptions {
   model: string;
