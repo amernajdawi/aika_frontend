@@ -45,17 +45,16 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
     let pdfLink = `${backendUrl}/documents/download/${documentId}`;
     
     if (pageNumber !== null && pageNumber !== undefined) {
-      // Try different page navigation formats
-      // Format 1: Query parameter (most common for backend APIs)
-      pdfLink += `?page=${pageNumber}`;
+      // Use hash fragment for page navigation (works with most PDF viewers)
+      pdfLink += `#page=${pageNumber}`;
       
-      // Alternative formats (uncomment to try):
-      // Format 2: Hash fragment (for PDF.js viewers)
-      // pdfLink += `#page=${pageNumber}`;
-      // Format 3: PDF anchor (some PDF viewers)
-      // pdfLink += `#page=${pageNumber}`;
-      // Format 4: PDF named destination
+      // Alternative formats (uncomment to try if hash doesn't work):
+      // Format 1: Query parameter (for backend APIs that support it)
+      // pdfLink += `?page=${pageNumber}`;
+      // Format 2: PDF named destination
       // pdfLink += `#nameddest=page.${pageNumber}`;
+      // Format 3: PDF anchor with different syntax
+      // pdfLink += `#page=${pageNumber}&zoom=100`;
     }
     
     return pdfLink;
@@ -188,7 +187,12 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                   const pdfLink = createPdfLink(source.document_id, pageNumber);
                   
                   // --- Add console log for debugging ---
-                  console.log('Source Metadata:', source.metadata, 'Page:', pageNumber, 'Link:', pdfLink);
+                  console.log('🔍 PDF Link Debug:');
+                  console.log('Document ID:', source.document_id);
+                  console.log('Page Number:', pageNumber);
+                  console.log('Backend URL:', process.env.NEXT_PUBLIC_API_URL);
+                  console.log('Final PDF Link:', pdfLink);
+                  console.log('Link Format:', pdfLink.includes('#page=') ? 'Hash Fragment' : 'No Page Navigation');
                   
                   return (
                     <div
