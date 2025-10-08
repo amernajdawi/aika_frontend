@@ -10,14 +10,12 @@ import SettingsPanel from './SettingsPanel';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import ConversationList from './ConversationList';
-import FileUploader from './FileUploader';
 import MetaInformation from './MetaInformation';
 import MetaInformationModal from './MetaInformationModal';
 import OnaceSelector from './OnaceSelector';
 
 // Hooks
 import { useConversations } from '../hooks/useConversations';
-import { useFileUpload, DocumentCategory } from '../hooks/useFileUpload';
 import { useTheme } from '../hooks/useTheme';
 import { useChatApi } from '../hooks/useChatApi';
 import { useOnaceCategories } from '../hooks/useOnaceCategories';
@@ -38,7 +36,6 @@ export default function Chat() {
   // UI state
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showUploadArea, setShowUploadArea] = useState(false);
   const [selectedModel, setSelectedModel] = useState(MODELS[2].id);
   const [temperature, setTemperature] = useState(0.2);
   const [topK, setTopK] = useState(5);
@@ -51,7 +48,6 @@ export default function Chat() {
   // Custom hooks
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation, updateConversationTitle } = useConversations();
-  const { uploadedFiles, isUploading, uploadFiles, deleteFile, deleteFileFromKnowledgeBase, updateFileCategory, categories } = useFileUpload();
   const { sendMessage, isLoading } = useChatApi();
   const { categories: onaceCategories } = useOnaceCategories();
 
@@ -147,9 +143,6 @@ export default function Chat() {
   };
 
   // Handle file category update
-  const handleUpdateCategory = (fileId: string, category: DocumentCategory) => {
-    updateFileCategory(fileId, category);
-  };
 
   return (
     <div className={`flex h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
@@ -164,18 +157,6 @@ export default function Chat() {
           onCreateNewConversation={handleNewChat}
         />
 
-        {/* File Uploader */}
-        <FileUploader
-          isUploading={isUploading}
-          uploadedFiles={uploadedFiles}
-          onUpload={uploadFiles}
-          onDelete={deleteFile}
-          onDeleteFromKnowledgeBase={deleteFileFromKnowledgeBase}
-          onUpdateCategory={handleUpdateCategory}
-          isExpanded={showUploadArea}
-          onToggle={() => setShowUploadArea(!showUploadArea)}
-          categories={categories}
-        />
       </div>
 
       {/* Main Chat Area */}
