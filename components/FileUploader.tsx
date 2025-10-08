@@ -196,7 +196,7 @@ export default function FileUploader({
                                 <File className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                               </div>
                               <a
-                                href={`http://localhost:8000/documents/download/${file.id}`}
+                                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/download/${file.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate hover:text-blue-600 dark:hover:text-blue-400 underline cursor-pointer"

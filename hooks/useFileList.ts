@@ -39,7 +39,7 @@ export function useFileList() {
   const fetchFiles = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:8000/documents/files');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/files`);
       if (!response.ok) {
         throw new Error('Failed to fetch files');
       }

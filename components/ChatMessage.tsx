@@ -68,7 +68,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       if (matchingSource) {
         // Create clickable link
         const pageNumber = matchingSource.metadata.page_number;
-        const pdfLink = `http://localhost:8000/documents/download/${matchingSource.document_id}${pageNumber !== null && pageNumber !== undefined ? `#page=${pageNumber}` : ''}`;
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const pdfLink = `${backendUrl}/documents/download/${matchingSource.document_id}${pageNumber !== null && pageNumber !== undefined ? `#page=${pageNumber}` : ''}`;
         
         parts.push(
           <span key={`link-${match.index}`}>
@@ -161,8 +162,9 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                   const pageNumber = source.metadata.page_number;
                   const hasPageNumber = pageNumber !== null && pageNumber !== undefined;
                   
-                  // Construct the PDF link URL
-                  const pdfLink = `http://localhost:8000/documents/download/${source.document_id}${hasPageNumber ? `#page=${pageNumber}` : ''}`;
+                  // Construct the PDF link URL using environment variable
+                  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  const pdfLink = `${backendUrl}/documents/download/${source.document_id}${hasPageNumber ? `#page=${pageNumber}` : ''}`;
                   
                   // --- Add console log for debugging ---
                   console.log('Source Metadata:', source.metadata, 'Page:', pageNumber, 'Link:', pdfLink);
@@ -269,7 +271,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                 <div className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0" />
                   <a 
-                    href={`http://localhost:8000/documents/download/${selectedSource.document_id}${selectedSource.metadata.page_number !== null && selectedSource.metadata.page_number !== undefined ? `#page=${selectedSource.metadata.page_number}` : ''}`}
+                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/download/${selectedSource.document_id}${selectedSource.metadata.page_number !== null && selectedSource.metadata.page_number !== undefined ? `#page=${selectedSource.metadata.page_number}` : ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-sm truncate hover:text-blue-600 dark:hover:text-blue-400 hover:underline cursor-pointer"

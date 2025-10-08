@@ -15,8 +15,9 @@ export interface UploadedFile {
   documentId?: string; // ID from the backend
 }
 
-const UPLOAD_URL = 'http://localhost:8000/documents/upload';
-const DELETE_URL = 'http://localhost:8000/documents'; // Base URL for document deletion
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const UPLOAD_URL = `${API_BASE_URL}/documents/upload`;
+const DELETE_URL = API_BASE_URL; // Base URL for document deletion
 
 export function useFileUpload() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -135,7 +136,7 @@ export function useFileUpload() {
   // Delete file from backend and locally
   const deleteFileFromKnowledgeBase = async (fileId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/documents/${fileId}`, {
+      const response = await fetch(`${API_BASE_URL}/documents/${fileId}`, {
         method: 'DELETE',
         headers: {
           'accept': 'application/json',
