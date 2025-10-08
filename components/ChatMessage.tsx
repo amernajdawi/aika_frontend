@@ -63,7 +63,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
   // Function to convert document references to clickable links
   const renderMessageWithLinks = (content: string) => {
     // Regular expression to match document references like (filename.pdf) or (VSME-EU-2025/1710) or (filename.pdf - date)
-    const documentRegex = /\(([^)]*\.pdf[^)]*)\)|\(([A-Z0-9\-_\/]+)\)/g;
+    // Match any text in parentheses that contains letters, numbers, hyphens, underscores, slashes, or dots
+    const documentRegex = /\(([A-Za-z0-9\-_\/\.]+)\)/g;
     
     const parts = [];
     let lastIndex = 0;
@@ -77,7 +78,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       
       // Extract the full match and the filename
       const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)" or "(VSME-EU-2025/1710)"
-      const documentReference = match[1] || match[2]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
+      const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
       
       // Try to find the document ID from the sources
       const matchingSource = message.sources?.find(source => 
@@ -122,8 +123,23 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           </span>
         );
       } else {
-        // If no matching source found, keep as plain text
-        parts.push(fullMatch);
+        // If no matching source found, still make it a clickable link
+        // This will help users search for the document even if we can't find the exact match
+        const searchLink = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/search?q=${encodeURIComponent(documentReference)}`;
+        
+        parts.push(
+          <span key={`search-link-${match.index}`}>
+            (<a 
+              href={searchLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+              title={`Search for document: ${documentReference}`}
+            >
+              {documentReference}
+            </a>)
+          </span>
+        );
       }
       
       lastIndex = match.index + match[0].length;
