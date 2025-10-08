@@ -62,8 +62,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
 
   // Function to convert document references to clickable links
   const renderMessageWithLinks = (content: string) => {
-    // Regular expression to match document references like (filename.pdf) or (filename.pdf - date)
-    const documentRegex = /\(([^)]*\.pdf[^)]*)\)/g;
+    // Regular expression to match document references like (filename.pdf) or (VSME-EU-2025/1710) or (filename.pdf - date)
+    const documentRegex = /\(([^)]*\.pdf[^)]*)\)|\(([A-Z0-9\-_\/]+)\)/g;
     
     const parts = [];
     let lastIndex = 0;
@@ -76,15 +76,31 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       }
       
       // Extract the full match and the filename
-      const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)"
-      const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf"
+      const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)" or "(VSME-EU-2025/1710)"
+      const documentReference = match[1] || match[2]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
       
       // Try to find the document ID from the sources
       const matchingSource = message.sources?.find(source => 
         source.metadata.filename === documentReference ||
         source.metadata.filename?.includes(documentReference) ||
-        documentReference.includes(source.metadata.filename || '')
+        documentReference.includes(source.metadata.filename || '') ||
+        // Also check for document codes in metadata
+        source.metadata.document_code === documentReference ||
+        source.metadata.code === documentReference ||
+        source.metadata.reference === documentReference
       );
+      
+      // Debug logging for document references
+      console.log('🔍 Document Reference Debug:');
+      console.log('Document Reference:', documentReference);
+      console.log('Available Sources:', message.sources?.map(s => ({
+        filename: s.metadata.filename,
+        document_code: s.metadata.document_code,
+        code: s.metadata.code,
+        reference: s.metadata.reference,
+        all_metadata: s.metadata
+      })));
+      console.log('Matching Source Found:', !!matchingSource);
       
       if (matchingSource) {
         // Create clickable link
