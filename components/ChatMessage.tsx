@@ -39,6 +39,28 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
     return text.substring(0, maxLength) + '...';
   };
 
+  // Helper function to create PDF links with page navigation
+  const createPdfLink = (documentId: string, pageNumber?: number | null) => {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    let pdfLink = `${backendUrl}/documents/download/${documentId}`;
+    
+    if (pageNumber !== null && pageNumber !== undefined) {
+      // Try different page navigation formats
+      // Format 1: Query parameter (most common for backend APIs)
+      pdfLink += `?page=${pageNumber}`;
+      
+      // Alternative formats (uncomment to try):
+      // Format 2: Hash fragment (for PDF.js viewers)
+      // pdfLink += `#page=${pageNumber}`;
+      // Format 3: PDF anchor (some PDF viewers)
+      // pdfLink += `#page=${pageNumber}`;
+      // Format 4: PDF named destination
+      // pdfLink += `#nameddest=page.${pageNumber}`;
+    }
+    
+    return pdfLink;
+  };
+
   // Function to convert document references to clickable links
   const renderMessageWithLinks = (content: string) => {
     // Regular expression to match document references like (filename.pdf) or (filename.pdf - date)
@@ -69,7 +91,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         // Create clickable link
         const pageNumber = matchingSource.metadata.page_number;
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const pdfLink = `${backendUrl}/documents/download/${matchingSource.document_id}${pageNumber !== null && pageNumber !== undefined ? `?page=${pageNumber}` : ''}`;
+        const pdfLink = createPdfLink(matchingSource.document_id, pageNumber);
         
         parts.push(
           <span key={`link-${match.index}`}>
@@ -162,10 +184,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                   const pageNumber = source.metadata.page_number;
                   const hasPageNumber = pageNumber !== null && pageNumber !== undefined;
                   
-                  // Construct the PDF link URL using environment variable
-                  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                  // Try different link formats - some backends prefer different approaches
-                  const pdfLink = `${backendUrl}/documents/download/${source.document_id}`;
+                  // Use helper function to create PDF link with page navigation
+                  const pdfLink = createPdfLink(source.document_id, pageNumber);
                   
                   // --- Add console log for debugging ---
                   console.log('Source Metadata:', source.metadata, 'Page:', pageNumber, 'Link:', pdfLink);
@@ -272,7 +292,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                 <div className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0" />
                   <a 
-                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/download/${selectedSource.document_id}${selectedSource.metadata.page_number !== null && selectedSource.metadata.page_number !== undefined ? `?page=${selectedSource.metadata.page_number}` : ''}`}
+                    href={createPdfLink(selectedSource.document_id, selectedSource.metadata.page_number)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-sm truncate hover:text-blue-600 dark:hover:text-blue-400 hover:underline cursor-pointer"
