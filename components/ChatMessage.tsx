@@ -81,15 +81,28 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
       
       // Try to find the document ID from the sources
-      const matchingSource = message.sources?.find(source => 
-        source.metadata.filename === documentReference ||
-        source.metadata.filename?.includes(documentReference) ||
-        documentReference.includes(source.metadata.filename || '') ||
-        // Also check for document codes in metadata
-        source.metadata.document_code === documentReference ||
-        source.metadata.code === documentReference ||
-        source.metadata.reference === documentReference
-      );
+      const matchingSource = message.sources?.find(source => {
+        // Check all possible metadata fields for matches
+        const metadata = source.metadata;
+        const searchFields = [
+          metadata.filename,
+          metadata.document_code,
+          metadata.code,
+          metadata.reference,
+          metadata.document_id,
+          metadata.title,
+          metadata.name
+        ];
+        
+        // Check if any field matches exactly or contains the document reference
+        return searchFields.some(field => 
+          field && (
+            field === documentReference ||
+            field.includes(documentReference) ||
+            documentReference.includes(field)
+          )
+        );
+      });
       
       // Debug logging for document references
       console.log('🔍 Document Reference Debug:');
@@ -123,23 +136,9 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           </span>
         );
       } else {
-        // If no matching source found, still make it a clickable link
-        // This will help users search for the document even if we can't find the exact match
-        const searchLink = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/search?q=${encodeURIComponent(documentReference)}`;
-        
-        parts.push(
-          <span key={`search-link-${match.index}`}>
-            (<a 
-              href={searchLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-              title={`Search for document: ${documentReference}`}
-            >
-              {documentReference}
-            </a>)
-          </span>
-        );
+        // If no matching source found, keep as plain text but add a note
+        console.log('⚠️ No matching source found for document reference:', documentReference);
+        parts.push(fullMatch);
       }
       
       lastIndex = match.index + match[0].length;
