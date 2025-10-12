@@ -66,6 +66,11 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
     // Match any text in parentheses that contains letters, numbers, hyphens, underscores, slashes, or dots
     const documentRegex = /\(([A-Za-z0-9\-_\/\.]+)\)/g;
     
+    // Debug: Count total matches
+    const allMatches = content.match(documentRegex);
+    console.log('🔍 Total document references found:', allMatches?.length || 0);
+    console.log('🔍 All matches:', allMatches);
+    
     const parts = [];
     let lastIndex = 0;
     let match;
@@ -79,6 +84,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       // Extract the full match and the filename
       const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)" or "(VSME-EU-2025/1710)"
       const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
+      
+      console.log('🔍 Processing match:', fullMatch, 'at index:', match.index);
       
       // Try to find the document ID from the sources
       const matchingSource = message.sources?.find(source => {
