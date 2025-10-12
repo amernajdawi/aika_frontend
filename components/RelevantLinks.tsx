@@ -4,10 +4,47 @@ import React from 'react';
 
 interface RelevantLinksProps {
   links: string[];
+  messageContent?: string;
 }
 
-export default function RelevantLinks({ links }: RelevantLinksProps) {
+export default function RelevantLinks({ links, messageContent = '' }: RelevantLinksProps) {
   if (!links || links.length === 0) {
+    return null;
+  }
+
+  // Filter links based on message content relevance
+  const getRelevantLinks = () => {
+    if (!messageContent) return links;
+    
+    const content = messageContent.toLowerCase();
+    const relevantLinks: string[] = [];
+    
+    // Water-related keywords
+    const waterKeywords = ['wasser', 'water', 'wasserqualität', 'water quality', 'wasserentnahme', 'water withdrawal', 'wasserverbrauch', 'water consumption', 'emreg', 'wasserwirtschaft'];
+    
+    // Industry-related keywords  
+    const industryKeywords = ['industrie', 'industry', 'emissionen', 'emissions', 'industrial', 'betrieb', 'facility', 'anlage', 'plant', 'factory'];
+    
+    // Nature-related keywords
+    const natureKeywords = ['natur', 'nature', 'biodiversität', 'biodiversity', 'natura 2000', 'naturschutz', 'nature protection', 'lebensraum', 'habitat', 'artenschutz', 'species protection'];
+    
+    // Check each link against content keywords
+    links.forEach(link => {
+      if (link.includes('emreg') && waterKeywords.some(keyword => content.includes(keyword))) {
+        relevantLinks.push(link);
+      } else if (link.includes('industry.eea.europa.eu') && industryKeywords.some(keyword => content.includes(keyword))) {
+        relevantLinks.push(link);
+      } else if (link.includes('natura2000') && natureKeywords.some(keyword => content.includes(keyword))) {
+        relevantLinks.push(link);
+      }
+    });
+    
+    return relevantLinks;
+  };
+
+  const filteredLinks = getRelevantLinks();
+  
+  if (filteredLinks.length === 0) {
     return null;
   }
 
@@ -26,12 +63,12 @@ export default function RelevantLinks({ links }: RelevantLinksProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
         <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-          {getLinkName(links[0])}
+          {getLinkName(filteredLinks[0])}
         </h4>
       </div>
       
       <div className="space-y-2">
-        {links.map((link, index) => (
+        {filteredLinks.map((link, index) => (
           <div key={index} className="flex items-start gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
             <a

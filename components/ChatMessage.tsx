@@ -202,7 +202,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         {/* Relevant Links Section */}
         {message.relevant_links && message.relevant_links.length > 0 && (
           <div className="mt-3">
-            <RelevantLinks links={message.relevant_links} />
+            <RelevantLinks links={message.relevant_links} messageContent={message.content} />
           </div>
         )}
         
