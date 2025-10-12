@@ -186,6 +186,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         {/* Relevant Links Section */}
         {message.relevant_links && message.relevant_links.length > 0 && (
           <div className="mt-3">
+            {/* Debug logging for relevant links */}
+            {console.log('🔍 Relevant Links Debug:', message.relevant_links)}
             <RelevantLinks links={message.relevant_links} />
           </div>
         )}

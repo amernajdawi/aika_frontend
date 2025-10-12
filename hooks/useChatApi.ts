@@ -46,6 +46,12 @@ export function useChatApi() {
 
       const data: ChatResponse = await response.json();
 
+      // Debug logging for API response
+      console.log('🔍 API Response Debug:');
+      console.log('Full API Response:', data);
+      console.log('Relevant Links:', data.relevant_links);
+      console.log('Relevant Links Length:', data.relevant_links?.length);
+
       if (!data.success) {
         throw new Error(data.message?.content || 'Failed to get response');
       }
