@@ -7,14 +7,7 @@ interface RelevantLinksProps {
 }
 
 export default function RelevantLinks({ links }: RelevantLinksProps) {
-  // Debug logging
-  console.log('🔍 RelevantLinks Component Debug:');
-  console.log('Links received:', links);
-  console.log('Links length:', links?.length);
-  console.log('Links type:', typeof links);
-  
   if (!links || links.length === 0) {
-    console.log('⚠️ No links to display - returning null');
     return null;
   }
 
@@ -26,8 +19,6 @@ export default function RelevantLinks({ links }: RelevantLinksProps) {
     return 'Relevant Link';
   };
 
-  console.log('✅ Rendering RelevantLinks component with', links.length, 'links');
-  
   return (
     <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
       <div className="flex items-center gap-2 mb-3">

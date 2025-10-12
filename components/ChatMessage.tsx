@@ -94,6 +94,26 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           metadata.name
         ];
         
+        // Special handling for VSME document codes
+        if (documentReference.includes('VSME-EU-2025/1710') && metadata.filename?.includes('EU_2025_1710_VSME.pdf')) {
+          return true;
+        }
+        
+        // More flexible VSME matching
+        if (documentReference.includes('VSME') && metadata.filename?.includes('VSME')) {
+          return true;
+        }
+        
+        // Match document codes with filenames (extract year and number)
+        const vsmeMatch = documentReference.match(/VSME-EU-(\d{4})\/(\d+)/);
+        if (vsmeMatch) {
+          const [, year, number] = vsmeMatch;
+          const expectedFilename = `EU_${year}_${number}_VSME.pdf`;
+          if (metadata.filename === expectedFilename) {
+            return true;
+          }
+        }
+        
         // Check if any field matches exactly or contains the document reference
         return searchFields.some(field => 
           field && (
@@ -103,18 +123,6 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           )
         );
       });
-      
-      // Debug logging for document references
-      console.log('🔍 Document Reference Debug:');
-      console.log('Document Reference:', documentReference);
-      console.log('Available Sources:', message.sources?.map(s => ({
-        filename: s.metadata.filename,
-        document_code: s.metadata.document_code,
-        code: s.metadata.code,
-        reference: s.metadata.reference,
-        all_metadata: s.metadata
-      })));
-      console.log('Matching Source Found:', !!matchingSource);
       
       if (matchingSource) {
         // Create clickable link
@@ -136,8 +144,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           </span>
         );
       } else {
-        // If no matching source found, keep as plain text but add a note
-        console.log('⚠️ No matching source found for document reference:', documentReference);
+        // If no matching source found, keep as plain text
         parts.push(fullMatch);
       }
       
@@ -151,11 +158,6 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
     
     return parts.length > 0 ? parts : content;
   };
-
-  // Debug logging for relevant links
-  if (message.relevant_links && message.relevant_links.length > 0) {
-    console.log('🔍 Relevant Links Debug:', message.relevant_links);
-  }
 
   return (
     <div
@@ -221,14 +223,6 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                   
                   // Use helper function to create PDF link with page navigation
                   const pdfLink = createPdfLink(source.document_id, pageNumber);
-                  
-                  // --- Add console log for debugging ---
-                  console.log('🔍 PDF Link Debug:');
-                  console.log('Document ID:', source.document_id);
-                  console.log('Page Number:', pageNumber);
-                  console.log('Backend URL:', process.env.NEXT_PUBLIC_API_URL);
-                  console.log('Final PDF Link:', pdfLink);
-                  console.log('Link Format:', pdfLink.includes('#page=') ? 'Hash Fragment' : 'No Page Navigation');
                   
                   return (
                     <div
