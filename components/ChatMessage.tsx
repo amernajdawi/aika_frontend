@@ -66,12 +66,9 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       return content;
     }
     
-    // Regular expression to match document references in multiple formats:
-    // 1. (filename.pdf) or (VSME-EU-2025/1710) - old format
-    // 2. filename.pdf (Page X) - new format from LLM
-    // 3. According to filename.pdf (Page X) - new format from LLM
-    // 4. Laut filename.pdf (Seite X) - German format
-    const documentRegex = /(?:According to |As stated in |As documented in |Laut |Wie in )?([A-Za-z0-9\-_\/\.üäöÜÄÖß]+\.pdf)\s*\((?:Page|Seite)\s+(\d+)\)|\(([A-Za-z0-9\-_\/\.üäöÜÄÖß]+)\)/g;
+    // Regular expression to match document references like (filename.pdf) or (VSME-EU-2025/1710) or (filename.pdf - date)
+    // Match any text in parentheses that contains letters, numbers, hyphens, underscores, slashes, or dots
+    const documentRegex = /\(([A-Za-z0-9\-_\/\.]+)\)/g;
     
     const parts = [];
     let lastIndex = 0;
@@ -85,9 +82,8 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         }
         
         // Extract the full match and the filename
-        const fullMatch = match[0]; // e.g., "According to VSME-EU-2025-1710.pdf (Page 15)" or "(VSME-EU-2025/1710)"
-        const documentReference = match[1] || match[3]; // e.g., "VSME-EU-2025-1710.pdf" or "VSME-EU-2025/1710"
-        const pageNumber = match[2]; // e.g., "15" for new format, undefined for old format
+        const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)" or "(VSME-EU-2025/1710)"
+        const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
         
         // Try to find the document ID from the sources
         const matchingSource = message.sources?.find(source => {
@@ -135,38 +131,21 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         
         if (matchingSource) {
           // Create clickable link
-          // Use page number from regex match if available, otherwise use metadata page number
-          const linkPageNumber = pageNumber ? parseInt(pageNumber) : matchingSource.metadata.page_number;
+          const pageNumber = matchingSource.metadata.page_number;
           const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const pdfLink = createPdfLink(matchingSource.document_id, linkPageNumber);
-          
-          // Create the link text based on the format
-          const linkText = pageNumber ? `${documentReference} (Page ${pageNumber})` : documentReference;
-          const linkTitle = `Open ${documentReference}${linkPageNumber !== null && linkPageNumber !== undefined ? ` at page ${linkPageNumber}` : ''}`;
+          const pdfLink = createPdfLink(matchingSource.document_id, pageNumber);
           
           parts.push(
             <span key={`link-${match.index}`}>
-              {pageNumber ? (
-                <a 
-                  href={pdfLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                  title={linkTitle}
-                >
-                  {linkText}
-                </a>
-              ) : (
-                <a 
-                  href={pdfLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                  title={linkTitle}
-                >
-                  ({documentReference})
-                </a>
-              )}
+              (<a 
+                href={pdfLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                title={`Open ${documentReference}${pageNumber !== null && pageNumber !== undefined ? ` at page ${pageNumber}` : ''}`}
+              >
+                {documentReference}
+              </a>)
             </span>
           );
         } else {
