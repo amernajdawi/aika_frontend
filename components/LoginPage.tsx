@@ -69,7 +69,7 @@ export default function LoginPage() {
             Welcome to AIKA
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Your AI Compliance Assistant
+            Your AI ESG Assistant
           </p>
         </div>
 
@@ -164,7 +164,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            © 2025 AIKA - AI Compliance Assistant
+            © 2025 AIKA - AI ESG Assistant
           </p>
         </div>
       </div>

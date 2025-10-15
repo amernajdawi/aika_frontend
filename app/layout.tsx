@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'aika',
-  description: 'A ChatGPT-style interface for RAG-based question answering',
+  title: 'AIKA - AI ESG Assistant',
+  description: 'AI-powered ESG and sustainability reporting assistant with comprehensive regulatory guidance',
 };
 
 export default function RootLayout({

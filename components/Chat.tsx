@@ -258,7 +258,7 @@ export default function Chat() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    Welcome to AIKA - Your AI Compliance Assistant
+                    Welcome to AIKA - Your AI ESG Assistant
                   </h3>
                   <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
                     <p>
@@ -268,7 +268,7 @@ export default function Chat() {
                       <strong>📋 VSME Focus:</strong> This system prioritizes VSME (EU 2025/1710) requirements while providing comprehensive regulatory guidance.
                     </p>
                     <p>
-                      <strong>💬 How to use:</strong> Ask questions about compliance, sustainability reporting, or specific regulations. I'll provide answers based on your industry selection.
+                      <strong>💬 How to use:</strong> Ask questions about ESG, sustainability reporting, or specific regulations. I'll provide answers based on your industry selection.
                     </p>
                   </div>
                 </div>
