@@ -66,13 +66,13 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       return content;
     }
     
-    // Regular expression to match document references like (filename.pdf) or (VSME-EU-2025/1710) or (filename.pdf - date)
-    // Match any text in parentheses that contains letters, numbers, hyphens, underscores, slashes, or dots
-    const documentRegex = /\(([A-Za-z0-9\-_\/\.]+)\)/g;
+    // Regular expression to match document references like (filename.pdf) or (VSME-EU-2025/1710) or (filename.pdf; filename2.pdf)
+    // Match any text in parentheses that contains letters, numbers, hyphens, underscores, slashes, dots, semicolons, and spaces
+    const documentRegex = /\(([A-Za-z0-9\-_\/\.\s;]+)\)/g;
     
-    const parts = [];
+    const parts: (string | JSX.Element)[] = [];
     let lastIndex = 0;
-    let match;
+    let match: RegExpExecArray | null;
     
     try {
       while ((match = documentRegex.exec(content)) !== null) {
@@ -81,63 +81,67 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
           parts.push(content.substring(lastIndex, match.index));
         }
         
-        // Extract the full match and the filename
-        const fullMatch = match[0]; // e.g., "(1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf)" or "(VSME-EU-2025/1710)"
-        const documentReference = match[1]; // e.g., "1_2021-07-06_DelVO_2021_2178_TAXORA_EU.pdf" or "VSME-EU-2025/1710"
+        // Extract the full match and the content inside parentheses
+        const fullMatch = match[0]; // e.g., "(R_2017_TCFD.pdf; G_2022_CCACSEI.pdf)"
+        const documentReferences = match[1]; // e.g., "R_2017_TCFD.pdf; G_2022_CCACSEI.pdf"
         
-        // Try to find the document ID from the sources
-        const matchingSource = message.sources?.find(source => {
-          // Check all possible metadata fields for matches
-          const metadata = source.metadata;
-          const searchFields = [
-            metadata.filename,
-            metadata.document_code,
-            metadata.code,
-            metadata.reference,
-            metadata.document_id,
-            metadata.title,
-            metadata.name
-          ];
-          
-          // Special handling for VSME document codes
-          if (documentReference.includes('VSME-EU-2025/1710') && metadata.filename?.includes('EU_2025_1710_VSME.pdf')) {
-            return true;
-          }
-          
-          // More flexible VSME matching
-          if (documentReference.includes('VSME') && metadata.filename?.includes('VSME')) {
-            return true;
-          }
-          
-          // Match document codes with filenames (extract year and number)
-          const vsmeMatch = documentReference.match(/VSME-EU-(\d{4})\/(\d+)/);
-          if (vsmeMatch) {
-            const [, year, number] = vsmeMatch;
-            const expectedFilename = `EU_${year}_${number}_VSME.pdf`;
-            if (metadata.filename === expectedFilename) {
+        // Split by semicolon to handle multiple citations
+        const individualRefs = documentReferences.split(';').map(ref => ref.trim());
+        
+        // Create links for each reference
+        const linkElements = individualRefs.map((documentReference, refIndex) => {
+          // Try to find the document ID from the sources
+          const matchingSource = message.sources?.find(source => {
+            // Check all possible metadata fields for matches
+            const metadata = source.metadata;
+            const searchFields = [
+              metadata.filename,
+              metadata.document_code,
+              metadata.code,
+              metadata.reference,
+              metadata.document_id,
+              metadata.title,
+              metadata.name
+            ];
+            
+            // Special handling for VSME document codes
+            if (documentReference.includes('VSME-EU-2025/1710') && metadata.filename?.includes('EU_2025_1710_VSME.pdf')) {
               return true;
             }
-          }
+            
+            // More flexible VSME matching
+            if (documentReference.includes('VSME') && metadata.filename?.includes('VSME')) {
+              return true;
+            }
+            
+            // Match document codes with filenames (extract year and number)
+            const vsmeMatch = documentReference.match(/VSME-EU-(\d{4})\/(\d+)/);
+            if (vsmeMatch) {
+              const [, year, number] = vsmeMatch;
+              const expectedFilename = `EU_${year}_${number}_VSME.pdf`;
+              if (metadata.filename === expectedFilename) {
+                return true;
+              }
+            }
+            
+            // Check if any field matches exactly or contains the document reference
+            return searchFields.some(field => 
+              field && (
+                field === documentReference ||
+                field.includes(documentReference) ||
+                documentReference.includes(field)
+              )
+            );
+          });
           
-          // Check if any field matches exactly or contains the document reference
-          return searchFields.some(field => 
-            field && (
-              field === documentReference ||
-              field.includes(documentReference) ||
-              documentReference.includes(field)
-            )
-          );
-        });
-        
-        if (matchingSource) {
-          // Create clickable link
-          const pageNumber = matchingSource.metadata.page_number;
-          const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const pdfLink = createPdfLink(matchingSource.document_id, pageNumber);
-          
-          parts.push(
-            <span key={`link-${match.index}`}>
-              (<a 
+          if (matchingSource) {
+            // Create clickable link
+            const pageNumber = matchingSource.metadata.page_number;
+            const pdfLink = createPdfLink(matchingSource.document_id, pageNumber);
+            
+            return (
+              <a 
+                key={`link-${match?.index || 0}-${refIndex}`}
                 href={pdfLink}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -145,13 +149,25 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                 title={`Open ${documentReference}${pageNumber !== null && pageNumber !== undefined ? ` at page ${pageNumber}` : ''}`}
               >
                 {documentReference}
-              </a>)
-            </span>
-          );
-        } else {
-          // If no matching source found, keep as plain text
-          parts.push(fullMatch);
-        }
+              </a>
+            );
+          } else {
+            // If no matching source found, keep as plain text
+            return <span key={`text-${match?.index || 0}-${refIndex}`}>{documentReference}</span>;
+          }
+        });
+        
+        // Join the links with semicolons and wrap in parentheses
+        parts.push(
+          <span key={`link-${match.index}`}>
+            ({linkElements.map((element, index) => (
+              <span key={index}>
+                {element}
+                {index < linkElements.length - 1 && '; '}
+              </span>
+            ))})
+          </span>
+        );
         
         lastIndex = match.index + match[0].length;
       }
