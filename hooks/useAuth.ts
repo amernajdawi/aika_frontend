@@ -93,12 +93,16 @@ export function useAuth() {
   };
 
   const logout = () => {
-    localStorage.removeItem('aika_user');
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      isLoading: false,
-    });
+    if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('aika_user');
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+      });
+      // Force a page refresh to ensure the login page is shown
+      window.location.reload();
+    }
   };
 
   return {
