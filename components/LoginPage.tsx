@@ -154,30 +154,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo Users Info */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">
-              Demo Users Available:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <div className="font-medium text-gray-700 dark:text-gray-300">Amernaj</div>
-                <div className="text-gray-500 dark:text-gray-400">Amer&1234</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <div className="font-medium text-gray-700 dark:text-gray-300">Florian plakolb</div>
-                <div className="text-gray-500 dark:text-gray-400">Florian&1234</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <div className="font-medium text-gray-700 dark:text-gray-300">Michaela plakolb</div>
-                <div className="text-gray-500 dark:text-gray-400">Michaela&1234</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <div className="font-medium text-gray-700 dark:text-gray-300">test1</div>
-                <div className="text-gray-500 dark:text-gray-400">test1&1234</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
