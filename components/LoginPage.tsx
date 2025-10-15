@@ -27,12 +27,17 @@ export default function LoginPage() {
 
     try {
       const result = await login(credentials);
-      if (!result.success) {
+      if (result.success) {
+        // Login successful - the useAuth hook will handle the state change
+        // and the parent component will automatically redirect
+        // Force a page refresh to ensure state is properly updated
+        window.location.reload();
+      } else {
         setError(result.message || 'Login failed');
+        setIsLoading(false);
       }
     } catch (error) {
       setError('An unexpected error occurred');
-    } finally {
       setIsLoading(false);
     }
   };

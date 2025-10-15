@@ -53,6 +53,7 @@ export function useAuth() {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
 
+
       const user = USERS.find(
         u => u.username === credentials.username && u.password === credentials.password
       );
