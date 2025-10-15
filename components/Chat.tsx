@@ -19,6 +19,7 @@ import { useConversations } from '../hooks/useConversations';
 import { useTheme } from '../hooks/useTheme';
 import { useChatApi } from '../hooks/useChatApi';
 import { useOnaceCategories } from '../hooks/useOnaceCategories';
+import { useAuth } from '../hooks/useAuth';
 
 // Utils
 import { exportChatAsJson } from '../utils/exportUtils';
@@ -47,7 +48,8 @@ export default function Chat() {
 
   // Custom hooks
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation, updateConversationTitle } = useConversations();
+  const { user, logout } = useAuth();
+  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation, updateConversationTitle } = useConversations(user?.username);
   const { sendMessage, isLoading } = useChatApi();
   const { categories: onaceCategories } = useOnaceCategories();
 
@@ -107,7 +109,9 @@ export default function Chat() {
     // If no conversation exists, create one
     let activeConversationId = currentConversationId;
     if (!activeConversationId) {
-      activeConversationId = createNewConversation();
+      const newConversationId = createNewConversation();
+      if (!newConversationId) return; // Can't create conversation without user
+      activeConversationId = newConversationId;
     }
 
     // Create and add user message
@@ -174,10 +178,12 @@ export default function Chat() {
               setShowMetaInfoModal(true);
             }
           }}
+          onLogout={logout}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
           title={currentConversation?.title || 'New Chat'}
           onUpdateTitle={handleUpdateTitle}
+          userDisplayName={user?.displayName}
         />
 
         {/* Industry Selector */}

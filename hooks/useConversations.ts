@@ -8,43 +8,52 @@ export interface Conversation {
   messages: Message[];
   lastUpdated: Date;
   metaInformation?: string;
+  userId: string; // Associate conversation with specific user
 }
 
-export function useConversations() {
+export function useConversations(userId?: string) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Create a new conversation function (extracted for reuse)
   const createNewConversation = useCallback(() => {
+    if (!userId) return null; // Don't create conversation without user
+    
     // Only create if not already initialized or explicitly requested
     const newConversation: Conversation = {
       id: uuidv4(),
       title: 'New Chat',
       messages: [],
       lastUpdated: new Date(),
-      metaInformation: ''
+      metaInformation: '',
+      userId: userId
     };
     setConversations(prev => [newConversation, ...prev]);
     setCurrentConversationId(newConversation.id);
     return newConversation.id;
-  }, []);
+  }, [userId]);
 
   // Load conversations from localStorage on initial render
   useEffect(() => {
-    if (isInitialized) return; // Skip if already initialized
+    if (isInitialized || !userId) return; // Skip if already initialized or no user
     
     const savedConversations = localStorage.getItem('conversations');
     if (savedConversations) {
       const parsed = JSON.parse(savedConversations);
-      if (parsed.length > 0) {
-        setConversations(parsed.map((conv: any) => ({
+      // Filter conversations by current user
+      const userConversations = parsed
+        .filter((conv: any) => conv.userId === userId)
+        .map((conv: any) => ({
           ...conv,
           lastUpdated: new Date(conv.lastUpdated)
-        })));
-        setCurrentConversationId(parsed[0].id);
+        }));
+      
+      if (userConversations.length > 0) {
+        setConversations(userConversations);
+        setCurrentConversationId(userConversations[0].id);
       } else {
-        // If there are no saved conversations, create a new one automatically
+        // If there are no saved conversations for this user, create a new one automatically
         createNewConversation();
       }
     } else {
@@ -53,13 +62,27 @@ export function useConversations() {
     }
     
     setIsInitialized(true);
-  }, [createNewConversation, isInitialized]);
+  }, [createNewConversation, isInitialized, userId]);
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
-    if (!isInitialized) return; // Don't save until fully initialized
-    localStorage.setItem('conversations', JSON.stringify(conversations));
-  }, [conversations, isInitialized]);
+    if (!isInitialized || !userId) return; // Don't save until fully initialized or no user
+    
+    // Get existing conversations from other users
+    const existingConversations = localStorage.getItem('conversations');
+    let allConversations: Conversation[] = [];
+    
+    if (existingConversations) {
+      const parsed = JSON.parse(existingConversations);
+      // Keep conversations from other users
+      allConversations = parsed.filter((conv: any) => conv.userId !== userId);
+    }
+    
+    // Add current user's conversations
+    allConversations = [...allConversations, ...conversations];
+    
+    localStorage.setItem('conversations', JSON.stringify(allConversations));
+  }, [conversations, isInitialized, userId]);
 
   const updateConversationTitle = (conversationId: string, title: string) => {
     setConversations(prev => prev.map(conv => {

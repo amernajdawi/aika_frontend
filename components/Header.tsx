@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Trash, Download, Sun, Moon, FileText } from 'lucide-react';
+import { Settings, Trash, Download, Sun, Moon, FileText, LogOut } from 'lucide-react';
 import EditableChatTitle from './EditableChatTitle';
 
 interface HeaderProps {
@@ -8,10 +8,12 @@ interface HeaderProps {
   onClearChat: () => void;
   onExportChat: () => void;
   onEditMetaInfo: () => void;
+  onLogout: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   title: string;
   onUpdateTitle: (newTitle: string) => void;
+  userDisplayName?: string;
 }
 
 export default function Header({
@@ -19,10 +21,12 @@ export default function Header({
   onClearChat,
   onExportChat,
   onEditMetaInfo,
+  onLogout,
   isDarkMode,
   onToggleDarkMode,
   title,
-  onUpdateTitle
+  onUpdateTitle,
+  userDisplayName
 }: HeaderProps) {
   return (
     <header className="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
@@ -31,7 +35,14 @@ export default function Header({
       </div>
       
       <div className="w-1/3 flex justify-center">
-        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">aika</h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">aika</h1>
+          {userDisplayName && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Welcome, {userDisplayName}
+            </p>
+          )}
+        </div>
       </div>
       
       <div className="flex items-center space-x-1 justify-end w-1/3">
@@ -73,6 +84,14 @@ export default function Header({
           aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+        
+        <button
+          onClick={onLogout}
+          className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+          aria-label="Logout"
+        >
+          <LogOut className="w-5 h-5" />
         </button>
       </div>
     </header>
