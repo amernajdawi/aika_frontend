@@ -12,37 +12,9 @@ export default function RelevantLinks({ links, messageContent = '' }: RelevantLi
     return null;
   }
 
-  // Filter links based on message content relevance
-  const getRelevantLinks = () => {
-    if (!messageContent) return links;
-    
-    const content = messageContent.toLowerCase();
-    const relevantLinks: string[] = [];
-    
-    // Water-related keywords
-    const waterKeywords = ['wasser', 'water', 'wasserqualität', 'water quality', 'wasserentnahme', 'water withdrawal', 'wasserverbrauch', 'water consumption', 'emreg', 'wasserwirtschaft'];
-    
-    // Industry-related keywords  
-    const industryKeywords = ['industrie', 'industry', 'emissionen', 'emissions', 'industrial', 'betrieb', 'facility', 'anlage', 'plant', 'factory'];
-    
-    // Nature-related keywords
-    const natureKeywords = ['natur', 'nature', 'biodiversität', 'biodiversity', 'natura 2000', 'naturschutz', 'nature protection', 'lebensraum', 'habitat', 'artenschutz', 'species protection'];
-    
-    // Check each link against content keywords
-    links.forEach(link => {
-      if (link.includes('emreg') && waterKeywords.some(keyword => content.includes(keyword))) {
-        relevantLinks.push(link);
-      } else if (link.includes('industry.eea.europa.eu') && industryKeywords.some(keyword => content.includes(keyword))) {
-        relevantLinks.push(link);
-      } else if (link.includes('natura2000') && natureKeywords.some(keyword => content.includes(keyword))) {
-        relevantLinks.push(link);
-      }
-    });
-    
-    return relevantLinks;
-  };
-
-  const filteredLinks = getRelevantLinks();
+  // Since the backend now handles specific link detection based on exact Tool_Overview prompts,
+  // we can display all provided links without additional filtering
+  const filteredLinks = links;
   
   if (filteredLinks.length === 0) {
     return null;
@@ -50,9 +22,16 @@ export default function RelevantLinks({ links, messageContent = '' }: RelevantLi
 
   // Get the link name based on URL
   const getLinkName = (url: string) => {
-    if (url.includes('emreg')) return 'Water Quality Maps (EMREG)';
-    if (url.includes('industry.eea.europa.eu')) return 'Industrial Emissions Portal';
+    if (url.includes('emreg')) return 'Wasser Karten Emreg';
+    if (url.includes('industry.eea.europa.eu')) return 'eea-map';
     if (url.includes('natura2000')) return 'Natura 2000 Viewer';
+    if (url.includes('aqueductwaterrisk')) return 'Aqueduct Water Risk Atlas';
+    if (url.includes('waterriskfilter.panda')) return 'WWF Water Risk Filter - Maps';
+    if (url.includes('ehyd.gv.at')) return 'WebGIS-Applikation eHYD';
+    if (url.includes('hydro.ooe.gv.at')) return 'Hydrographische Dienst OÖ';
+    if (url.includes('keybiodiversityareas')) return 'Key Biodiversity Areas';
+    if (url.includes('hora.gv.at')) return 'HORA (Hazard Overview for Risk Assessment Austria)';
+    if (url.includes('umweltbundesamt.at')) return 'Umweltbundesamt';
     return 'Relevant Link';
   };
 
